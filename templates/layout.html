@@ -1,0 +1,94 @@
+# templates/layout.html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simple Budget App</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; color: #333; }
+    .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 1rem; }
+    header { background: #2c3e50; color: white; padding: 1rem 0; }
+    nav { display: flex; justify-content: space-between; align-items: center; }
+    nav h1 { margin: 0; }
+    nav ul { display: flex; list-style: none; margin: 0; padding: 0; }
+    nav li { margin-left: 1rem; }
+    nav a { color: white; text-decoration: none; }
+    .flash { padding: 0.5rem; background: #f8d7da; margin-bottom: 1rem; border-radius: 3px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background-color: #f2f2f2; }
+    form { margin-bottom: 1rem; }
+    input, select { padding: 0.5rem; margin-bottom: 0.5rem; width: 100%; box-sizing: border-box; }
+    button { padding: 0.5rem 1rem; background: #3498db; color: white; border: none; cursor: pointer; }
+    .card { background: white; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); padding: 1rem; margin-bottom: 1rem; }
+    .columns { display: flex; gap: 1rem; }
+    .column { flex: 1; }
+    .positive { color: green; }
+    .negative { color: red; }
+    .warning { color: orange; }
+    .budget-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+    .budget-card { background: #f5f5f5; border-radius: 5px; padding: 1rem; text-align: center; }
+    .budget-card h3 { margin-top: 0; }
+    .budget-card a { display: inline-block; margin-top: 1rem; }
+    .actions { display: flex; gap: 0.5rem; }
+    .btn-small { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+    .btn-danger { background: #e74c3c; }
+    .btn-warning { background: #f39c12; }
+    @media (max-width: 768px) { .columns { flex-direction: column; } }
+
+    .budget-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .summary-item {
+        flex: 1;
+        min-width: 150px;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .summary-item h4 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .amount {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <nav>
+      <h1>Simple Budget</h1>
+      {% if session.logged_in %}
+      <ul>
+        <li><a href="{{ url_for('index') }}">Dashboard</a></li>
+        <li>Welcome, {{ session.username }}</li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  {% for message in messages %}
+  <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>

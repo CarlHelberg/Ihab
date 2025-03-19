@@ -1,0 +1,22 @@
+# templates/edit_category.html
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+  <h2>Edit Category</h2>
+  <form method="post">
+    <div>
+      <label for="name">Category Name</label>
+      <input type="text" id="name" name="name" value="{{ category.name }}" required>
+    </div>
+    <div>
+      <label for="budget_amount">Budget Amount</label>
+      <input type="number" step="0.01" id="budget_amount" name="budget_amount" value="{{ category.budget_amount }}" required>
+    </div>
+    <div>
+      <button type="submit">Update Category</button>
+      <a href="{{ url_for('view_budget', budget_id=category.budget_id) }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+

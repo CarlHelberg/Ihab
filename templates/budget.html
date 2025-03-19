@@ -1,0 +1,226 @@
+# templates/budget.html
+{% extends "layout.html" %}
+{% block content %}
+<h2>{{ budget.name }} Budget</h2>
+
+<div class="budget-summary">
+  <div class="summary-item">
+    <h4>Monthly Income</h4>
+    <span class="amount positive">${{ summary.monthly_income|round(2) }}</span>
+  </div>
+  <div class="summary-item">
+    <h4>One-time Income</h4>
+    <span class="amount positive">${{ summary.one_time_income|round(2) }}</span>
+  </div>
+  <div class="summary-item">
+    <h4>Total Budgeted</h4>
+    <span class="amount">${{ summary.total_budgeted|round(2) }}</span>
+  </div>
+  <div class="summary-item">
+    <h4>Total Spent</h4>
+    <span class="amount negative">${{ summary.total_spent|round(2) }}</span>
+  </div>
+  <div class="summary-item">
+    <h4>Unallocated</h4>
+    <span class="amount {% if summary.unallocated < 0 %}negative{% else %}positive{% endif %}">
+            ${{ summary.unallocated|round(2) }}
+        </span>
+  </div>
+</div>
+
+<div class="columns">
+
+  <div class="card">
+    <h3>Income Sources</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Amount</th>
+        <th>Frequency</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for income in incomes %}
+      <tr>
+        <td>{{ income.name }}</td>
+        <td class="positive">${{ income.amount|round(2) }}</td>
+        <td>{{ income.frequency|capitalize }}</td>
+        <td>{{ income.start_date }}</td>
+        <td>{{ income.end_date or 'N/A' }}</td>
+        <td class="actions">
+          <a href="{{ url_for('edit_income', income_id=income.id) }}" class="btn-small btn-warning">Edit</a>
+          <a href="{{ url_for('delete_income', income_id=income.id) }}" class="btn-small btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Add Income</h3>
+    <form method="post" action="{{ url_for('add_income') }}">
+      <input type="hidden" name="budget_id" value="{{ budget.id }}">
+      <div>
+        <label for="name">Income Name</label>
+        <input type="text" id="name" name="name" required placeholder="e.g., Salary, Freelance">
+      </div>
+      <div>
+        <label for="amount">Amount</label>
+        <input type="number" step="0.01" id="amount" name="amount" required>
+      </div>
+      <div>
+        <label for="frequency">Frequency</label>
+        <select id="frequency" name="frequency" required>
+          <option value="once">One-time</option>
+          <option value="weekly">Weekly</option>
+          <option value="bi-weekly">Bi-weekly</option>
+          <option value="monthly" selected>Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <div>
+        <label for="start_date">Start Date</label>
+        <input type="date" id="start_date" name="start_date" required>
+      </div>
+      <div>
+        <label for="end_date">End Date (optional)</label>
+        <input type="date" id="end_date" name="end_date">
+      </div>
+      <button type="submit">Add Income</button>
+    </form>
+  </div>
+
+
+
+  <div class="column">
+    <div class="card">
+      <h3>Budget Categories</h3>
+      <form method="post" action="{{ url_for('update_budget') }}">
+        <input type="hidden" name="budget_id" value="{{ budget.id }}">
+        <table>
+          <thead>
+          <tr>
+            <th>Category</th>
+            <th>Budgeted</th>
+            <th>Spent</th>
+            <th>Remaining</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for category in categories %}
+          <tr>
+            <td>{{ category.name }}</td>
+            <td>
+              <input type="number" step="0.01" name="budget_{{ category.id }}" value="{{ category.budget_amount }}">
+            </td>
+            <td class="negative">{{ category_totals[category.id].spent|round(2) }}</td>
+            <td class="{% if category_totals[category.id].remaining < 0 %}negative{% else %}positive{% endif %}">
+              {{ category_totals[category.id].remaining|round(2) }}
+            </td>
+            <td class="actions">
+              <a href="{{ url_for('edit_category', category_id=category.id) }}" class="btn-small btn-warning">Edit</a>
+              <a href="{{ url_for('delete_category', category_id=category.id) }}" class="btn-small btn-danger" onclick="return confirm('Are you sure? This will delete the category.')">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        <button type="submit">Update Budgets</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Add Category</h3>
+      <form method="post" action="{{ url_for('add_category') }}">
+        <input type="hidden" name="budget_id" value="{{ budget.id }}">
+        <div>
+          <label for="name">Category Name</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+          <label for="budget_amount">Initial Budget</label>
+          <input type="number" step="0.01" id="budget_amount" name="budget_amount" value="0">
+        </div>
+        <button type="submit">Add Category</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card">
+      <h3>Add Transaction</h3>
+      <form method="post" action="{{ url_for('add_transaction') }}">
+        <input type="hidden" name="budget_id" value="{{ budget.id }}">
+        <div>
+          <label for="date">Date</label>
+          <input type="date" id="date" name="date" value="{{ now }}" required>
+        </div>
+        <div>
+          <label for="payee">Payee</label>
+          <input type="text" id="payee" name="payee" required>
+        </div>
+        <div>
+          <label for="category_id">Category</label>
+          <select id="category_id" name="category_id" required>
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="amount">Amount</label>
+          <input type="number" step="0.01" id="amount" name="amount" required>
+        </div>
+        <div>
+          <label for="expense">Is this an expense?</label>
+          <input type="checkbox" id="expense" name="expense" checked>
+        </div>
+        <div>
+          <label for="memo">Memo (optional)</label>
+          <input type="text" id="memo" name="memo">
+        </div>
+        <button type="submit">Add Transaction</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Recent Transactions</h3>
+  <table>
+    <thead>
+    <tr>
+      <th>Date</th>
+      <th>Payee</th>
+      <th>Category</th>
+      <th>Amount</th>
+      <th>Memo</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for transaction in transactions %}
+    <tr>
+      <td>{{ transaction.date }}</td>
+      <td>{{ transaction.payee }}</td>
+      <td>{{ transaction.category_name }}</td>
+      <td class="{% if transaction.amount < 0 %}negative{% else %}positive{% endif %}">
+        {{ transaction.amount|round(2) }}
+      </td>
+      <td>{{ transaction.memo }}</td>
+      <td class="actions">
+        <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}" class="btn-small btn-warning">Edit</a>
+        <a href="{{ url_for('delete_transaction', transaction_id=transaction.id) }}" class="btn-small btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

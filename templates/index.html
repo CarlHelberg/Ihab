@@ -1,0 +1,122 @@
+
+# templates/index.html
+{% extends "layout.html" %}
+{% block content %}
+<h2>Budget Overview</h2>
+
+<div class="columns">
+    <div class="column">
+        <div class="card">
+            <h3>Budget Categories</h3>
+            <form method="post" action="{{ url_for('update_budget') }}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Budgeted</th>
+                            <th>Spent</th>
+                            <th>Remaining</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                        <tr>
+                            <td>{{ category.name }}</td>
+                            <td>
+                                <input type="number" step="0.01" name="budget_{{ category.id }}" value="{{ category.budget_amount }}">
+                            </td>
+                            <td class="negative">{{ category_totals[category.id].spent|round(2) }}</td>
+                            <td class="{% if category_totals[category.id].remaining < 0 %}negative{% else %}positive{% endif %}">
+                                {{ category_totals[category.id].remaining|round(2) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit">Update Budgets</button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h3>Add Category</h3>
+            <form method="post" action="{{ url_for('add_category') }}">
+                <div>
+                    <label for="name">Category Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="budget_amount">Initial Budget</label>
+                    <input type="number" step="0.01" id="budget_amount" name="budget_amount" value="0">
+                </div>
+                <button type="submit">Add Category</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="column">
+        <div class="card">
+            <h3>Add Transaction</h3>
+            <form method="post" action="{{ url_for('add_transaction') }}">
+                <div>
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" value="{{ now }}" required>
+                </div>
+                <div>
+                    <label for="payee">Payee</label>
+                    <input type="text" id="payee" name="payee" required>
+                </div>
+                <div>
+                    <label for="category_id">Category</label>
+                    <select id="category_id" name="category_id" required>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="amount">Amount</label>
+                    <input type="number" step="0.01" id="amount" name="amount" required>
+                </div>
+                <div>
+                    <div>
+                        <label for="expense">Is this an expense?</label>
+                        <input type="checkbox" id="expense" name="expense" checked>
+                    </div>
+                    <div>
+                        <label for="memo">Memo (optional)</label>
+                        <input type="text" id="memo" name="memo">
+                    </div>
+                    <button type="submit">Add Transaction</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Recent Transactions</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Payee</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Memo</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction.date }}</td>
+            <td>{{ transaction.payee }}</td>
+            <td>{{ transaction.category_name }}</td>
+            <td class="{% if transaction.amount < 0 %}negative{% else %}positive{% endif %}">
+                {{ transaction.amount|round(2) }}
+            </td>
+            <td>{{ transaction.memo }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+  <h2>Edit Income</h2>
+  <form method="post">
+    <div>
+      <label for="name">Income Name</label>
+      <input type="text" id="name" name="name" value="{{ income.name }}" required>
+    </div>
+    <div>
+      <label for="amount">Amount</label>
+      <input type="number" step="0.01" id="amount" name="amount" value="{{ income.amount }}" required>
+    </div>
+    <div>
+      <label for="frequency">Frequency</label>
+      <select id="frequency" name="frequency" required>
+        <option value="once" {% if income.frequency == 'once' %}selected{% endif %}>One-time</option>
+        <option value="weekly" {% if income.frequency == 'weekly' %}selected{% endif %}>Weekly</option>
+        <option value="bi-weekly" {% if income.frequency == 'bi-weekly' %}selected{% endif %}>Bi-weekly</option>
+        <option value="monthly" {% if income.frequency == 'monthly' %}selected{% endif %}>Monthly</option>
+        <option value="yearly" {% if income.frequency == 'yearly' %}selected{% endif %}>Yearly</option>
+      </select>
+    </div>
+    <div>
+      <label for="start_date">Start Date</label>
+      <input type="date" id="start_date" name="start_date" value="{{ income.start_date }}" required>
+    </div>
+    <div>
+      <label for="end_date">End Date (optional)</label>
+      <input type="date" id="end_date" name="end_date" value="{{ income.end_date }}">
+    </div>
+    <div>
+      <button type="submit">Update Income</button>
+      <a href="{{ url_for('view_budget', budget_id=income.budget_id) }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

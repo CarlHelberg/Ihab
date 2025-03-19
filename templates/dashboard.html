@@ -1,0 +1,25 @@
+# templates/dashboard.html
+{% extends "layout.html" %}
+{% block content %}
+<h2>Your Budgets</h2>
+
+<div class="budget-list">
+  {% for budget in budgets %}
+  <div class="budget-card">
+    <h3>{{ budget.name }}</h3>
+    <a href="{{ url_for('view_budget', budget_id=budget.id) }}" class="btn">View Budget</a>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h3>Create New Budget</h3>
+  <form method="post" action="{{ url_for('add_budget') }}">
+    <div>
+      <label for="name">Budget Name</label>
+      <input type="text" id="name" name="name" required placeholder="e.g., Personal, Family, Travel">
+    </div>
+    <button type="submit">Create Budget</button>
+  </form>
+</div>
+{% endblock %}
